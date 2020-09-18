@@ -1,0 +1,15 @@
+CREATE TABLE IF NOT EXISTS roles (
+	id SERIAL PRIMARY KEY,
+	name varchar(55) NOT NULL UNIQUE
+);
+
+INSERT INTO 
+	roles (id, name) 
+SELECT 
+	1, 'ROLE_SIMPLE_USER' 
+WHERE 
+	NOT EXISTS (
+		SELECT * FROM roles 
+		WHERE name LIKE 'ROLE_SIMPLE_USER'
+	); 
+	
