@@ -42,8 +42,8 @@ public class User {
 	private String email;
 	
 	@Column(nullable = false)
-	@Size(min = 8, message = "Password must include at least 8 symbols but not more than 30")
 	private String password;
+	
 	
 	/*
 	 * @Lob
@@ -58,4 +58,19 @@ public class User {
             inverseJoinColumns = @JoinColumn(
               name = "role_id", referencedColumnName = "id"))
 	private Set<Role> roles;
+	
+	@Override
+	public int hashCode() {
+		return  id.hashCode();
+	}
+	
+	public User(User user) {
+		id = user.id;
+		username = user.username;
+		name = user.name;
+		email = user.email;
+		password = user.password;
+	}
+	
+	public User() {}
 }

@@ -1,9 +1,7 @@
 package com.roquentin.arbiter.services;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 import javax.validation.Valid;
@@ -11,7 +9,6 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -22,10 +19,14 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.WebApplicationContext;
 
+import com.roquentin.arbiter.dto.UserNameDTO;
+import com.roquentin.arbiter.dto.UserUpdatePasswordDTO;
+import com.roquentin.arbiter.expections.UnauthorizedException;
+import com.roquentin.arbiter.expections.UniqueKeyViolationException;
 import com.roquentin.arbiter.expections.UserNotFoundException;
 import com.roquentin.arbiter.models.User;
 import com.roquentin.arbiter.payloads.requests.LoginRequest;
-import com.roquentin.arbiter.payloads.responses.ErrorResponse;
+import com.roquentin.arbiter.payloads.responses.JwtResponse;
 import com.roquentin.arbiter.payloads.responses.Responses;
 import com.roquentin.arbiter.payloads.responses.ErrorResponse.Causes;
 import com.roquentin.arbiter.repositories.UserRepository;
@@ -54,7 +55,7 @@ public class UserService {
 	
 	private User currentUser;
 	
-	public ResponseEntity<?> createUser( User newUser) {
+	public void createUser( User newUser) {
 		Map<String, String> errors = new HashMap<>();
 		if (repository.existsByUsernameIgnoreCase(newUser.getUsername())) {
 			errors.put("username", "Usernmae " + newUser.getUsername() + " has been taken.");
@@ -64,16 +65,16 @@ public class UserService {
 		}
 
 		if (!errors.isEmpty())
-			return ResponseEntity.badRequest().body(Responses.errorResponse(Causes.INTEGRITY_EXCEPTION, errors));
-
+			throw new UniqueKeyViolationException(errors);
+		
 		newUser.setRoles(Set.of(roleService.getRoleByName("ROLE_SIMPLE_USER")));
 		newUser.setPassword(encoder.encode(newUser.getPassword()));
 		repository.save(newUser);
-		return ResponseEntity.ok().body("Successfully registration");
+	
 	}
 	
 	
-	public ResponseEntity<?> login(LoginRequest request){
+	public JwtResponse login(LoginRequest request){
 		String identifier = request.getIdentifier();
 		String username =  (identifier.indexOf("@") != -1) ? 
 				repository.findByEmailIgnoreCase(identifier).orElseGet(User::new).getUsername() :
@@ -88,7 +89,7 @@ public class UserService {
 		
 		UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
 		
-		return ResponseEntity.ok().body(Responses.jwtResponse(jwt, userDetails));
+		return Responses.jwtResponse(jwt, userDetails);
  
 	}
 	
@@ -99,5 +100,34 @@ public class UserService {
 						.orElseThrow(UserNotFoundException::new);
 			
 			return currentUser;
+	}
+	
+	public void updatePassword(@Valid UserUpdatePasswordDTO pswdDTO) {
+		User user = new User(currentUser);
+		
+		
+		if (!encoder.matches(pswdDTO.getOldPassword(), user.getPassword()))
+			throw new UnauthorizedException("Actual password mismatch");
+	
+		user.setPassword(encoder.encode(pswdDTO.getNewPassword()));
+		currentUser = repository.save(user);
+
+	}
+	
+	public void updateEmail(@Valid String emailDto) {
+		User user = new User(currentUser);
+		
+		if (repository.existsByEmailIgnoreCase(emailDto))
+			throw new UniqueKeyViolationException(Map.of("email", emailDto));
+		
+		user.setEmail(emailDto);
+		
+		currentUser = repository.save(user);
+	}
+	
+	public void updateName(UserNameDTO nameDTO) {
+		currentUser.setName(nameDTO.getName());
+		currentUser = repository.save(currentUser);
+
 	}
 }

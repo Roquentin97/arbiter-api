@@ -5,7 +5,7 @@ public class ErrorResponse<T> {
 	private T message;
 	
 	public enum Causes {
-		INTEGRITY_EXCEPTION, ARGUMENT_NOT_VALID
+		INTEGRITY_EXCEPTION, ARGUMENT_NOT_VALID, ENTITY_NOT_FOUND
 	}
 	
 	protected ErrorResponse(Causes cause, T message ) {
