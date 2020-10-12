@@ -21,6 +21,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.roquentin.arbiter.dto.ConventionDTO;
 import com.roquentin.arbiter.models.Convention;
 import com.roquentin.arbiter.models.Cooperation;
 import com.roquentin.arbiter.services.ConventionService;
@@ -41,6 +42,8 @@ public class ConventionControllerTest {
 	static void init() {
 		cooperation = new Cooperation();
 		cooperation.setId(1l);
+		cooperation.setName("cooperation 1");
+		cooperation.setPassword("12345678aA$#");
 	}
 	
 	
@@ -51,16 +54,19 @@ public class ConventionControllerTest {
 	@DisplayName("POST /api/convention/create")
 	void testCreateConvention() throws Exception{
 		
-		Convention toPost = new Convention(
-				null, 
-				"newConvention", 
-				"conventionDesc", 
-				"conventionConsequence",
-				cooperation
-			); 
+		ConventionDTO toPost = new ConventionDTO();
+		toPost.setName("first convention");
+		toPost.setDescription("first convention description");
+		toPost.setCooperationId(1l);
+		toPost.setConsequence("first convention`s consequence");
 		
-		Convention toReturn = new Convention(toPost);
+		Convention toReturn = new Convention();
 		toReturn.setId(1l);
+		toReturn.setName(toPost.getName());
+		toReturn.setDescription(toPost.getDescription());
+		toReturn.setConsequence(toPost.getConsequence());
+
+		
 		
 		doReturn(toReturn).when(service).createConvention(any());
 		
@@ -71,15 +77,14 @@ public class ConventionControllerTest {
 			.andExpect(status().isCreated())
 			
 			.andExpect(jsonPath("$.id", is(1)))
-			.andExpect(jsonPath("$.name", is("newConvention")))
-			.andExpect(jsonPath("$.description", is("conventionDesc")))
-			.andExpect(jsonPath("$.consequence", is("conventionConsequence")))
-			.andExpect(jsonPath("$.cooperation", is(cooperation)));
+			.andExpect(jsonPath("$.name", is(toPost.getName())))
+			.andExpect(jsonPath("$.description", is(toPost.getDescription())))
+			.andExpect(jsonPath("$.consequence", is(toPost.getConsequence())));
 		
 			
 	}
 	
-    static String asJsonString(final Object obj) {
+    private static String asJsonString(final Object obj) {
         try {
             return new ObjectMapper().writeValueAsString(obj);
         } catch (Exception e) {

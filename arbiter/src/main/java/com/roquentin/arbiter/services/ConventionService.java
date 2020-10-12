@@ -1,5 +1,7 @@
 package com.roquentin.arbiter.services;
 
+import javax.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,17 +23,22 @@ public class ConventionService {
 	@Autowired
 	private UserService userService;
 	
-	public Convention createConvention(Convention newConvention) {
+	@Transactional
+	public Convention createConvention(ConventionDTO newConvention) {
 		//TODO:: voting
-		if (!cooperationService.canUserChangeCooperation(newConvention.getCooperation(), userService.getCurrentUser()))
+		if (!cooperationService.canUserChangeCooperation(newConvention.getCooperationId(), userService.getCurrentUser()))
 			throw new UnauthorizedException("No permissions to change the cooperation");
 		
-		return repository.save(newConvention);
+		return repository.saveUsingDTO(newConvention.getName(), newConvention.getDescription(),
+				newConvention.getCooperationId(), newConvention.getConsequence());
+		
 	}
 	
 	public void deleteConvention(Long id) {
 		//TODO: voting
 		repository.deleteById(id);
 	}
+	
+	
 
 }
