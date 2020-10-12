@@ -9,8 +9,7 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -19,8 +18,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.WebApplicationContext;
 
-import com.roquentin.arbiter.dto.UserNameDTO;
-import com.roquentin.arbiter.dto.UserUpdatePasswordDTO;
+import com.roquentin.arbiter.dto.UserPasswordUpdateDTO;
+import com.roquentin.arbiter.dto.UserRefDTO;
 import com.roquentin.arbiter.expections.UnauthorizedException;
 import com.roquentin.arbiter.expections.UniqueKeyViolationException;
 import com.roquentin.arbiter.expections.UserNotFoundException;
@@ -28,7 +27,6 @@ import com.roquentin.arbiter.models.User;
 import com.roquentin.arbiter.payloads.requests.LoginRequest;
 import com.roquentin.arbiter.payloads.responses.JwtResponse;
 import com.roquentin.arbiter.payloads.responses.Responses;
-import com.roquentin.arbiter.payloads.responses.ErrorResponse.Causes;
 import com.roquentin.arbiter.repositories.UserRepository;
 import com.roquentin.arbiter.security.UserDetailsImpl;
 import com.roquentin.arbiter.security.jwt.JwtUtils;
@@ -102,7 +100,7 @@ public class UserService {
 			return currentUser;
 	}
 	
-	public void updatePassword(@Valid UserUpdatePasswordDTO pswdDTO) {
+	public void updatePassword(@Valid UserPasswordUpdateDTO pswdDTO) {
 		User user = new User(currentUser);
 		
 		
@@ -125,7 +123,7 @@ public class UserService {
 		currentUser = repository.save(user);
 	}
 	
-	public void updateName(UserNameDTO nameDTO) {
+	public void updateName(UserRefDTO nameDTO) {
 		currentUser.setName(nameDTO.getName());
 		currentUser = repository.save(currentUser);
 

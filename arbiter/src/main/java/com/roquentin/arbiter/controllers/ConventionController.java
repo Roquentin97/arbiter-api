@@ -1,5 +1,7 @@
 package com.roquentin.arbiter.controllers;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -13,6 +15,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.roquentin.arbiter.models.Convention;
 import com.roquentin.arbiter.services.ConventionService;
 
+
+
 @RestController
 @RequestMapping("/api/convention")
 public class ConventionController {
@@ -22,8 +26,8 @@ public class ConventionController {
 	
 	@PostMapping("/create")
 	// TODO after voting implementation change to 202 ACCEPTED
-	@ResponseStatus(code = HttpStatus.CREATED, reason = "Convention created successfullty")
-	public Convention createConvention(@RequestBody Convention newConvention) {
+	@ResponseStatus(code = HttpStatus.CREATED)
+	public Convention createConvention( @Valid @RequestBody Convention newConvention) {
 		return service.createConvention(newConvention);
 	}
 	

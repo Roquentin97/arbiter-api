@@ -13,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.roquentin.arbiter.dto.CooperationDTO;
 import com.roquentin.arbiter.expections.CooperationNotFoundException;
 import com.roquentin.arbiter.models.Cooperation;
 import com.roquentin.arbiter.models.User;
@@ -78,10 +77,18 @@ public class CooperationService {
 
 			//TODO: notify in coop chat
 			cooperation = repository.save(cooperation);
-			return ResponseEntity.ok().body(new CooperationDTO(cooperation));
+			return ResponseEntity.ok().body(cooperation);
 		}
 		
 		return new ResponseEntity<String>(HttpStatus.UNAUTHORIZED);
+	}
+	
+	public boolean canUserChangeCooperation(Long cooperationId, User user) {
+		return canUserChangeCooperation(repository.getOne(cooperationId), user);
+	}
+	
+	public boolean canUserChangeCooperation(Cooperation cooperation, User user) {
+		return cooperation.getUsers().contains(user);
 	}
 
 }

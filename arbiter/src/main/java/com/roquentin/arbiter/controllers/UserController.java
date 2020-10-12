@@ -2,23 +2,18 @@ package com.roquentin.arbiter.controllers;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Email;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.roquentin.arbiter.dto.UserNameDTO;
-import com.roquentin.arbiter.dto.UserUpdatePasswordDTO;
-import com.roquentin.arbiter.models.User;
+import com.roquentin.arbiter.dto.UserPasswordUpdateDTO;
+import com.roquentin.arbiter.dto.UserRefDTO;
 import com.roquentin.arbiter.services.UserService;
 
 @CrossOrigin
@@ -31,7 +26,7 @@ public class UserController {
 	
 	@PutMapping("/update/password")
 	@ResponseStatus(code = HttpStatus.OK, reason = "Password updated successfully")
-	public void updatePassword(@Valid @RequestBody UserUpdatePasswordDTO pswdDTO) {
+	public void updatePassword(@Valid @RequestBody UserPasswordUpdateDTO pswdDTO) {
 		 service.updatePassword(pswdDTO);
 	}
 	
@@ -43,7 +38,7 @@ public class UserController {
 	
 	@PutMapping("/update/name")
 	@ResponseStatus(code = HttpStatus.OK, reason = "Name updated successfully")
-	public void updateName(@Valid UserNameDTO userName) {
+	public void updateName(@Valid UserRefDTO userName) {
 		 service.updateName(userName);
 	}
 	

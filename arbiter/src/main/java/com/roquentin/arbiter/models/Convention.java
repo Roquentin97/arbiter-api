@@ -45,5 +45,23 @@ public class Convention {
 	private Cooperation cooperation;
 	
 	
+	public Convention() {}
+	
+	public Convention(Long id, String name, String description, String consequence, Cooperation cooperation) {
+		this.id = id;
+		this.name = name;
+		this.description = description;
+		this.consequence = consequence;
+		this.cooperation = cooperation;
+	}
+	
+	public Convention(Convention convention) {
+		id = convention.id;
+		name = convention.name;
+		description = convention.description;
+		consequence = convention.consequence;
+		cooperation = convention.cooperation;
+	}
+	
 
 }
