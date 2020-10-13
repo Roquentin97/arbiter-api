@@ -11,8 +11,8 @@ import com.roquentin.arbiter.models.Convention;
 
 @Repository
 public interface ConventionRepository  extends JpaRepository<Convention, Long>{
-	@Modifying(flushAutomatically = true)
+	@Modifying
 	@Query(value = "INSERT INTO conventions (name, description, cooperation_id, consequence) VALUES (:name, :desc, :coop, :cons)", nativeQuery = true)
-	Convention saveUsingDTO(@Param("name") String name, @Param("desc") String description,
+	int saveUsingDTO(@Param("name") String name, @Param("desc") String description,
 			@Param("coop") Long cooperationId, @Param("cons") String consequence);
 }
