@@ -6,7 +6,12 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import javax.validation.ConstraintViolationException;
+import javax.validation.ValidationException;
+
 import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
@@ -19,6 +24,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.roquentin.arbiter.dto.ConventionDTO;
@@ -37,6 +43,7 @@ public class ConventionControllerTest {
 	private  MockMvc mocMvc;
 	
 	private static Cooperation cooperation;
+	private static ConventionDTO toPost;
 	
 	@BeforeAll
 	static void init() {
@@ -44,6 +51,12 @@ public class ConventionControllerTest {
 		cooperation.setId(1l);
 		cooperation.setName("cooperation 1");
 		cooperation.setPassword("12345678aA$#");
+		
+		toPost = new ConventionDTO();
+		toPost.setName("first convention");
+		toPost.setDescription("first convention description");
+		toPost.setCooperationId(1l);
+		toPost.setConsequence("first convention`s consequence");
 	}
 	
 	
@@ -51,37 +64,82 @@ public class ConventionControllerTest {
 	
 	@Test
 	@WithMockUser
-	@DisplayName("POST /api/convention/create")
-	void testCreateConvention() throws Exception{
+	@DisplayName("valid POST /api/convention/create")
+	void testCreateConventionWithValidArguments() throws Exception{
 		
-		ConventionDTO toPost = new ConventionDTO();
-		toPost.setName("first convention");
-		toPost.setDescription("first convention description");
-		toPost.setCooperationId(1l);
-		toPost.setConsequence("first convention`s consequence");
-		
-		Convention toReturn = new Convention();
-		toReturn.setId(1l);
-		toReturn.setName(toPost.getName());
-		toReturn.setDescription(toPost.getDescription());
-		toReturn.setConsequence(toPost.getConsequence());
-
-		
-		
-		doReturn(toReturn).when(service).createConvention(any());
+		doReturn(true).when(service).createConvention(any());
 		
 		 mocMvc.perform(post("/api/convention/create")
 			.contentType(MediaType.APPLICATION_JSON)
 			.content(asJsonString(toPost)))
 			
-			.andExpect(status().isCreated())
-			
-			.andExpect(jsonPath("$.id", is(1)))
-			.andExpect(jsonPath("$.name", is(toPost.getName())))
-			.andExpect(jsonPath("$.description", is(toPost.getDescription())))
-			.andExpect(jsonPath("$.consequence", is(toPost.getConsequence())));
+			.andExpect(status().isCreated());
 		
 			
+	}
+	
+	@Test
+	@WithMockUser
+	@DisplayName("invalid POST /api/convention/create")
+	void testCreateConventionWithinValidArguments() throws Exception{
+		
+		doReturn(true).when(service).createConvention(any());
+		
+		ConventionDTO post = new ConventionDTO(toPost);
+		
+		post.setName("123");
+		
+		MvcResult result = mocMvc.perform(post("/api/convention/create")
+			.contentType(MediaType.APPLICATION_JSON)
+			.content(asJsonString(post)))
+			.andExpect(status().is4xxClientError())
+			.andReturn();
+
+		assertTrue(result.getResolvedException() instanceof MethodArgumentNotValidException);
+		
+		post.setName(toPost.getName());
+
+		post.setDescription("123");
+		
+		result = mocMvc.perform(post("/api/convention/create")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(asJsonString(post)))
+				.andExpect(status().is4xxClientError())
+				.andReturn();
+
+		assertTrue(result.getResolvedException() instanceof MethodArgumentNotValidException);
+		 
+		post.setDescription(toPost.getDescription());
+		
+		post.setConsequence("123");
+		
+		result = mocMvc.perform(post("/api/convention/create")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(asJsonString(post)))
+				.andExpect(status().is4xxClientError())
+				.andReturn();
+
+		assertTrue(result.getResolvedException() instanceof MethodArgumentNotValidException);
+		 
+		 post.setConsequence(toPost.getConsequence());
+		 
+		 post.setCooperationId(null);
+		 
+		result = mocMvc.perform(post("/api/convention/create")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(asJsonString(post)))
+				.andExpect(status().is4xxClientError())
+				.andReturn();
+
+		assertTrue(result.getResolvedException() instanceof MethodArgumentNotValidException);
+					
+	}
+	
+	@Test
+	@WithMockUser
+	@DisplayName("valid REMOVE /api/convention/delete/{id}")
+	public void testDeleteConvention() {
+		
 	}
 	
     private static String asJsonString(final Object obj) {

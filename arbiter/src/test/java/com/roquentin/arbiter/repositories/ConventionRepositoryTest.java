@@ -1,20 +1,17 @@
 package com.roquentin.arbiter.repositories;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertNotNull;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
+
 
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.test.annotation.Rollback;
+
 import org.springframework.test.context.jdbc.Sql;
 
 import com.roquentin.arbiter.dto.ConventionDTO;
@@ -24,9 +21,6 @@ import com.roquentin.arbiter.models.User;
 
 @DataJpaTest
 public class ConventionRepositoryTest {
-	
-	@Autowired
-	private TestEntityManager entitymanager;
 	
 	@Autowired
 	private ConventionRepository repository;
@@ -66,7 +60,6 @@ public class ConventionRepositoryTest {
 	
 	@Test
 	@Sql( scripts = "cooperations.sql")
-	@Rollback(true)
 	public void testSave() {
 		Convention convention = new Convention();
 		convention.setName("name");
@@ -81,7 +74,6 @@ public class ConventionRepositoryTest {
 	}
 	
 	@Test
-	@Modifying(flushAutomatically = true)
 	@Sql("cooperations.sql")
 	public void testSaveUsingDTO() {
 		

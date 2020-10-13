@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.roquentin.arbiter.dto.ConventionDTO;
-import com.roquentin.arbiter.models.Convention;
+
 import com.roquentin.arbiter.services.ConventionService;
 
 
@@ -28,12 +28,14 @@ public class ConventionController {
 	
 	@PostMapping("/create")
 	// TODO after voting implementation change to 202 ACCEPTED
-	@ResponseStatus(code = HttpStatus.CREATED)
-	public Convention createConvention( @Valid @RequestBody ConventionDTO newConvention) {
-		return  service.createConvention(newConvention);
+	public ResponseEntity<?> createConvention( @Valid @RequestBody ConventionDTO newConvention) {
+		return  service.createConvention(newConvention) ? 
+				new ResponseEntity(HttpStatus.CREATED) :
+				new ResponseEntity(HttpStatus.BAD_REQUEST);
 	}
 	
 	@DeleteMapping("/delete/{id}")
+	@ResponseStatus(code = HttpStatus.OK, reason = "Convention removed successfully")
 	public void deleteConvention(@PathVariable Long id) {
 		service.deleteConvention(id);
 	}

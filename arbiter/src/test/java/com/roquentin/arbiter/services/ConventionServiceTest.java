@@ -4,9 +4,11 @@ import static org.mockito.Mockito.doReturn;
 
 import java.util.Set;
 
+import static org.junit.Assert.assertTrue;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -15,6 +17,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
 import com.roquentin.arbiter.dto.ConventionDTO;
+import com.roquentin.arbiter.expections.UnauthorizedException;
 import com.roquentin.arbiter.models.Convention;
 import com.roquentin.arbiter.models.Cooperation;
 import com.roquentin.arbiter.models.User;
@@ -37,6 +40,10 @@ public class ConventionServiceTest {
 	@BeforeAll
 	static void init() {
 		
+		user1 = new User();
+		user1.setId(1l);
+		user1.setName("user1");
+		user1.setEmail("user1@gmail");
 		
 		cooperation = new Cooperation();
 		cooperation.setId(1l);
@@ -68,16 +75,43 @@ public class ConventionServiceTest {
 	
 	
 	@Test
-	@DisplayName("Create convention using all valid parameters")
-	void createConventionWithAllValidParameters() {
+	@DisplayName("Convention creation by an authorized user")
+	void testCreateConventionWithAuthorizedUser() {
 		ConventionDTO conventionDTO = new ConventionDTO();
 		
-		doReturn(fullConvention).when(repository).saveUsingDTO(any(), any(), any(), any());
+		doReturn(1).when(repository).saveUsingDTO(any(), any(), any(), any());
 		doReturn(true).when(coopService).canUserChangeCooperation((Long)any(), any());
-		Convention returnedConvention = service.createConvention(conventionDTO);
 		
-		Assertions.assertNotNull(returnedConvention, () -> "The saved convention should not be null");
-		Assertions.assertNotNull(returnedConvention.getId());
-		Assertions.assertEquals(cooperation, returnedConvention.getCooperation(), () -> "cooperation doesn't match");
+		assertTrue(service.createConvention(conventionDTO));
+		
 	}
+	
+	@Test
+	@DisplayName("Convention creation by an unauthorized user")
+	void testCreateConventionWithUnauthorizedUser() {
+		ConventionDTO conventionDTO = new ConventionDTO();
+		
+		doReturn(1).when(repository).saveUsingDTO(any(), any(), any(), any());
+		doReturn(false).when(coopService).canUserChangeCooperation((Long)any(), any());
+		
+		assertThrows(UnauthorizedException.class, () -> service.createConvention(conventionDTO));
+		
+	}
+	
+	@Test
+	@DisplayName("Convention deletion by an authorized user")
+	void testDeleteConventionWithAuthorizedUser() {
+		doReturn(true).when(coopService).canUserChangeCooperation((Cooperation)any(), any());
+	}
+	
+	@Test
+	@DisplayName("Convention deletion by an unauthorized user")
+	void testDeleteConventionWithUnauthorizedUser() {
+		doReturn(false).when(coopService).canUserChangeCooperation((Cooperation)any(), any());
+		doReturn(new Convention()).when(repository).getOne(any());
+		
+		assertThrows(UnauthorizedException.class, () -> service.deleteConvention(any()));
+	}
+	
+	
 }

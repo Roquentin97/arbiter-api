@@ -23,6 +23,7 @@ public class ConventionDTO {
 	
 	
 	@Pattern(regexp = "^[\\w| |'|`]*$", message = "Name can include only letters, numbers, whitespaces, apostrophes, and underscores.")
+	@Size(min = 4, max = 45)
 	@Column(nullable = false)
 	private String name;
 	
