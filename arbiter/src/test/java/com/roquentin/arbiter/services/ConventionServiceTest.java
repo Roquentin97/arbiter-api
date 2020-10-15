@@ -1,6 +1,7 @@
 package com.roquentin.arbiter.services;
 
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.when;
 
 import java.util.Set;
 
@@ -38,7 +39,7 @@ public class ConventionServiceTest {
 	private static User user1;
 	
 	@BeforeAll
-	static void init() {
+	private static void init() {
 		
 		user1 = new User();
 		user1.setId(1l);
@@ -79,8 +80,10 @@ public class ConventionServiceTest {
 	void testCreateConventionWithAuthorizedUser() {
 		ConventionDTO conventionDTO = new ConventionDTO();
 		
-		doReturn(1).when(repository).saveUsingDTO(any(), any(), any(), any());
-		doReturn(true).when(coopService).canUserChangeCooperation((Long)any(), any());
+		when(repository.saveUsingDTO(any(), any(), any(), any()))
+			.thenReturn(1);
+		when(coopService.canUserChangeCooperation((Long)any(), any()))
+			.thenReturn(true);
 		
 		assertTrue(service.createConvention(conventionDTO));
 		
@@ -91,8 +94,10 @@ public class ConventionServiceTest {
 	void testCreateConventionWithUnauthorizedUser() {
 		ConventionDTO conventionDTO = new ConventionDTO();
 		
-		doReturn(1).when(repository).saveUsingDTO(any(), any(), any(), any());
-		doReturn(false).when(coopService).canUserChangeCooperation((Long)any(), any());
+		when(repository.saveUsingDTO(any(), any(), any(), any()))
+			.thenReturn(1);
+		when(coopService.canUserChangeCooperation((Long)any(), any()))
+			.thenReturn(false);
 		
 		assertThrows(UnauthorizedException.class, () -> service.createConvention(conventionDTO));
 		
@@ -101,14 +106,17 @@ public class ConventionServiceTest {
 	@Test
 	@DisplayName("Convention deletion by an authorized user")
 	void testDeleteConventionWithAuthorizedUser() {
-		doReturn(true).when(coopService).canUserChangeCooperation((Cooperation)any(), any());
+		when(coopService.canUserChangeCooperation((Cooperation)any(), any()))
+			.thenReturn(true);
 	}
 	
 	@Test
 	@DisplayName("Convention deletion by an unauthorized user")
 	void testDeleteConventionWithUnauthorizedUser() {
-		doReturn(false).when(coopService).canUserChangeCooperation((Cooperation)any(), any());
-		doReturn(new Convention()).when(repository).getOne(any());
+		when(coopService.canUserChangeCooperation((Cooperation)any(), any()))
+			.thenReturn(false);
+		
+		when(repository.getOne(any())).thenReturn(new Convention());
 		
 		assertThrows(UnauthorizedException.class, () -> service.deleteConvention(any()));
 	}

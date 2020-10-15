@@ -1,6 +1,7 @@
 package com.roquentin.arbiter.controllers;
 
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.when;
 import static org.mockito.ArgumentMatchers.any;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -83,7 +84,8 @@ public class ConventionControllerTest {
 	@DisplayName("invalid POST /api/convention/create")
 	void testCreateConventionWithinValidArguments() throws Exception{
 		
-		doReturn(true).when(service).createConvention(any());
+		when(service.createConvention(any()))
+				.thenReturn(true);
 		
 		ConventionDTO post = new ConventionDTO(toPost);
 		
