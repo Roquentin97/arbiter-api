@@ -54,8 +54,7 @@ public class ConventionRepositoryTest {
 		cooperation.setDescription("description of the first cooperation");
 		cooperation.setPassword("password");
 		cooperation.setUsers(Set.of(user1));
-		
-		System.out.println("HI");
+
 	}
 	
 	@Test

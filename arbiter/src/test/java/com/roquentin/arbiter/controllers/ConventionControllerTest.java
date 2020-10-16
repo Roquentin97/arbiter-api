@@ -32,6 +32,7 @@ import com.roquentin.arbiter.dto.ConventionDTO;
 import com.roquentin.arbiter.models.Convention;
 import com.roquentin.arbiter.models.Cooperation;
 import com.roquentin.arbiter.services.ConventionService;
+import com.roquentin.arbiter.testUtils.MapperHelper;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -68,11 +69,12 @@ public class ConventionControllerTest {
 	@DisplayName("valid POST /api/convention/create")
 	void testCreateConventionWithValidArguments() throws Exception{
 		
-		doReturn(true).when(service).createConvention(any());
+		when(service.createConvention(any()))
+			.thenReturn(true);
 		
 		 mocMvc.perform(post("/api/convention/create")
 			.contentType(MediaType.APPLICATION_JSON)
-			.content(asJsonString(toPost)))
+			.content(MapperHelper.asJsonString(toPost)))
 			
 			.andExpect(status().isCreated());
 		
@@ -82,7 +84,7 @@ public class ConventionControllerTest {
 	@Test
 	@WithMockUser
 	@DisplayName("invalid POST /api/convention/create")
-	void testCreateConventionWithinValidArguments() throws Exception{
+	void testCreateConventionWithInvalidFields() throws Exception{
 		
 		when(service.createConvention(any()))
 				.thenReturn(true);
@@ -93,7 +95,7 @@ public class ConventionControllerTest {
 		
 		MvcResult result = mocMvc.perform(post("/api/convention/create")
 			.contentType(MediaType.APPLICATION_JSON)
-			.content(asJsonString(post)))
+			.content(MapperHelper.asJsonString(post)))
 			.andExpect(status().is4xxClientError())
 			.andReturn();
 
@@ -105,7 +107,7 @@ public class ConventionControllerTest {
 		
 		result = mocMvc.perform(post("/api/convention/create")
 				.contentType(MediaType.APPLICATION_JSON)
-				.content(asJsonString(post)))
+				.content(MapperHelper.asJsonString(post)))
 				.andExpect(status().is4xxClientError())
 				.andReturn();
 
@@ -117,7 +119,7 @@ public class ConventionControllerTest {
 		
 		result = mocMvc.perform(post("/api/convention/create")
 				.contentType(MediaType.APPLICATION_JSON)
-				.content(asJsonString(post)))
+				.content(MapperHelper.asJsonString(post)))
 				.andExpect(status().is4xxClientError())
 				.andReturn();
 
@@ -129,7 +131,7 @@ public class ConventionControllerTest {
 		 
 		result = mocMvc.perform(post("/api/convention/create")
 				.contentType(MediaType.APPLICATION_JSON)
-				.content(asJsonString(post)))
+				.content(MapperHelper.asJsonString(post)))
 				.andExpect(status().is4xxClientError())
 				.andReturn();
 
@@ -144,13 +146,7 @@ public class ConventionControllerTest {
 		
 	}
 	
-    private static String asJsonString(final Object obj) {
-        try {
-            return new ObjectMapper().writeValueAsString(obj);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
+
 	
 
 }
