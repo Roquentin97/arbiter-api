@@ -1,5 +1,6 @@
 package com.roquentin.arbiter.controllers;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -16,6 +17,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.roquentin.arbiter.dto.CooperationFullDTO;
+import com.roquentin.arbiter.dto.CooperationRefDTO;
 import com.roquentin.arbiter.models.Cooperation;
 import com.roquentin.arbiter.payloads.requests.LoginRequest;
 import com.roquentin.arbiter.services.CooperationService;
@@ -35,7 +38,7 @@ public class CooperationController {
 	
 	@GetMapping("/list")
 	@ResponseStatus(HttpStatus.OK)
-	public Set<Cooperation> getAllForUser(){
+	public Set<CooperationRefDTO> getAllForUser(){
 		return service.getUsersCooperations();
 	}
 	

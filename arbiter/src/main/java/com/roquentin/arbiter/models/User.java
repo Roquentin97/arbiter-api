@@ -6,6 +6,7 @@ import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
@@ -25,7 +26,7 @@ import lombok.Data;
 @Table(name = "users")
 public class User {
 	
-	@Id @GeneratedValue
+	@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	
 	@Column(nullable = false, unique = true)
@@ -62,6 +63,16 @@ public class User {
 	@Override
 	public int hashCode() {
 		return  id.hashCode();
+	}
+	
+	@Override
+	public boolean equals(Object object) {
+		if (! (object instanceof User)) return false;
+		
+		User user = (User) object;
+		return (user.id == this.id 
+				&& user.email.equals(this.email) 
+				&& user.username.equals(this.username));
 	}
 	
 	public User(User user) {

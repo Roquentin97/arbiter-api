@@ -1,6 +1,8 @@
 package com.roquentin.arbiter.services;
 
 
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -13,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.roquentin.arbiter.dto.CooperationRefDTO;
 import com.roquentin.arbiter.expections.CooperationNotFoundException;
 import com.roquentin.arbiter.models.Cooperation;
 import com.roquentin.arbiter.models.User;
@@ -29,22 +32,23 @@ public class CooperationService {
 	private UserService userService;
 	
 	@Autowired 
-	InvitationService invitationService;
+	private InvitationService invitationService;
 	
 	@Autowired
-	PasswordEncoder encoder;
+	private PasswordEncoder encoder;
 	
 	@Transactional
 	public Map<String, String> createCooperation(Cooperation newCooperation) {
 	
+		//TODO: add possibility to add invited users when created
 		newCooperation.setUsers(Set.of(userService.getCurrentUser()));
 		newCooperation.setPassword(encoder.encode(newCooperation.getPassword()));
 		newCooperation = repository.save(newCooperation);
 		return Map.of("invitation", invitationService.createInvitation(userService.getCurrentUser().getId(), newCooperation.getId()));
 	}
 	
-	public Set<Cooperation> getUsersCooperations(){
-		return repository.findByUsers(userService.getCurrentUser());
+	public Set<CooperationRefDTO> getUsersCooperations(){
+		return repository.findByUsersToRefDTO(userService.getCurrentUser());
 	}
 	
 	public void leaveCooperation(Long id){
@@ -53,8 +57,10 @@ public class CooperationService {
 		
 		User user = userService.getCurrentUser();
 		//TODO log dubious action
+		System.out.println(users);
+		System.out.println(user);
 		if (! users.contains(user)) 
-				throw new CooperationNotFoundException();
+				throw new CooperationNotFoundException("No such cooperation " + user.getId() + "in user's list");
 		
 		if (users.size() == 1) {
 			repository.delete(coop);
@@ -70,7 +76,7 @@ public class CooperationService {
 	
 	public ResponseEntity<?> joinViaInvitation(LoginRequest request) {
 		Long id = invitationService.getCooperationId(request.getIdentifier());
-		Cooperation cooperation = repository.getOne(id);
+		Cooperation cooperation = repository.findById(id).orElseThrow(CooperationNotFoundException::new);
 		
 		if (encoder.matches(request.getPassword(), cooperation.getPassword())) {
 			cooperation.getUsers().add(userService.getCurrentUser());
@@ -84,7 +90,8 @@ public class CooperationService {
 	}
 	
 	public boolean canUserChangeCooperation(Long cooperationId, User user) {
-		return canUserChangeCooperation(repository.getOne(cooperationId), user);
+		return canUserChangeCooperation(repository.findById(cooperationId)
+				.orElseThrow(CooperationNotFoundException::new), user);
 	}
 	
 	public boolean canUserChangeCooperation(Cooperation cooperation, User user) {

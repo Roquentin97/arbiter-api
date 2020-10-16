@@ -1,12 +1,13 @@
 package com.roquentin.arbiter.services;
 
+import javax.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.roquentin.arbiter.dto.ConventionDTO;
 import com.roquentin.arbiter.expections.UnauthorizedException;
 import com.roquentin.arbiter.models.Convention;
-import com.roquentin.arbiter.models.Cooperation;
 import com.roquentin.arbiter.repositories.ConventionRepository;
 
 @Service
@@ -21,17 +22,26 @@ public class ConventionService {
 	@Autowired
 	private UserService userService;
 	
-	public Convention createConvention(Convention newConvention) {
+	@Transactional
+	public boolean createConvention(ConventionDTO newConvention) {
 		//TODO:: voting
-		if (!cooperationService.canUserChangeCooperation(newConvention.getCooperation(), userService.getCurrentUser()))
+		if (!cooperationService.canUserChangeCooperation(newConvention.getCooperationId(), userService.getCurrentUser()))
 			throw new UnauthorizedException("No permissions to change the cooperation");
 		
-		return repository.save(newConvention);
+		return 0 < repository.saveUsingDTO(newConvention.getName(), newConvention.getDescription(),
+				newConvention.getCooperationId(), newConvention.getConsequence());
+		
 	}
 	
 	public void deleteConvention(Long id) {
+		Convention convention = repository.getOne(id);
+		if (!cooperationService.canUserChangeCooperation(convention.getCooperation(), userService.getCurrentUser()))
+			throw new UnauthorizedException("No permissions to change the cooperation");
+		
 		//TODO: voting
 		repository.deleteById(id);
 	}
+	
+	
 
 }
