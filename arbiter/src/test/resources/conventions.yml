@@ -1,0 +1,13 @@
+convention:
+  - id: 1
+    name: "The first Convention"
+    description: "desc of first widget"
+    consequence: "the first convention's consequence"
+    cooperation_id: 1
+  - id: 2
+    name: "The second Convention"
+    description: "desc of the second widget"
+    cooperation_id: 1
+    
+
+  
