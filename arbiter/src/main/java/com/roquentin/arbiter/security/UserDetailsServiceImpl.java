@@ -19,10 +19,21 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 	
 	@Override
 	@Transactional
-	public UserDetails loadUserByUsername(String username) {
-		User user = repository.findByUsernameIgnoreCase(username)
+	// "login" is used instead of "username" because the implementation
+	// overrides original behavior and performs check whether username OR email is used
+	// as a conceptual trade-off to avoid multiple DB access 
+	public UserDetails loadUserByUsername(String login) {
+		
+		
+		
+		User user = (! login.contains("@") ?
+				repository.findByUsernameIgnoreCase(login)
 				.orElseThrow(
-						() -> new UsernameNotFoundException("User " + username + " not found!")
+						() -> new UsernameNotFoundException("User with username: " + login + " not found!")
+				) :
+				
+				repository.findByEmailIgnoreCase(login).orElseThrow(
+						() -> new UsernameNotFoundException("User with email: " + login + " not found!"))
 				);
 
 		return UserDetailsImpl.build(user);		

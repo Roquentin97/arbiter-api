@@ -9,10 +9,11 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
-
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -73,13 +74,10 @@ public class UserService {
 	
 	
 	public JwtResponse login(LoginRequest request){
-		String identifier = request.getIdentifier();
-		String username =  (identifier.indexOf("@") != -1) ? 
-				repository.findByEmailIgnoreCase(identifier).orElseGet(User::new).getUsername() :
-				identifier;
-				
+		
+		// UserDetailsImpl performs check whether username or email is used to log in 
 		Authentication authentication = authenticationManager.authenticate(
-				new UsernamePasswordAuthenticationToken(username, request.getPassword()));
+				new UsernamePasswordAuthenticationToken(request.getIdentifier(), request.getPassword()));
 		
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 		
@@ -100,7 +98,7 @@ public class UserService {
 			return currentUser;
 	}
 	
-	public void updatePassword(@Valid UserPasswordUpdateDTO pswdDTO) {
+	public void updatePassword(UserPasswordUpdateDTO pswdDTO) {
 		User user = new User(currentUser);
 		
 		
@@ -112,13 +110,14 @@ public class UserService {
 
 	}
 	
-	public void updateEmail(@Valid String emailDto) {
+	public void updateEmail(String email) {
 		User user = new User(currentUser);
 		
-		if (repository.existsByEmailIgnoreCase(emailDto))
-			throw new UniqueKeyViolationException(Map.of("email", emailDto));
+		if (repository.existsByEmailIgnoreCase(email))
+			throw new UniqueKeyViolationException(Map.of("email", email));
 		
-		user.setEmail(emailDto);
+		//TODO: email verification
+		user.setEmail(email);
 		
 		currentUser = repository.save(user);
 	}
