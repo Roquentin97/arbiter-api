@@ -33,4 +33,20 @@ public class JwtResponse {
 	public String getEmail() {
 		return email;
 	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (! (obj instanceof JwtResponse))
+			return false;
+		JwtResponse response = (JwtResponse) obj;
+		return this.token.equals(response.token)
+				&& this.id == response.id
+				&& this.username.equals(response.username)
+				&& this.email.equals(email);
+	}
+	
+	@Override
+	public int hashCode() {
+		return  id.hashCode() * token.hashCode() + username.hashCode() + email.hashCode(); 
+	}
 }
