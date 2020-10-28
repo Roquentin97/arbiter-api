@@ -92,21 +92,22 @@ public class UserService {
 	public User getCurrentUser() {
 		if (currentUser == null)
 			currentUser = repository.findByUsernameIgnoreCase(
-					SecurityContextHolder.getContext().getAuthentication().getName())
+					SecurityContextHolder
+					.getContext()
+					.getAuthentication()
+					.getName())
 						.orElseThrow(UserNotFoundException::new);
 			
 			return currentUser;
 	}
 	
 	public void updatePassword(UserPasswordUpdateDTO pswdDTO) {
-		User user = new User(currentUser);
-		
-		
-		if (!encoder.matches(pswdDTO.getOldPassword(), user.getPassword()))
+				
+		if (!encoder.matches(pswdDTO.getOldPassword(), getCurrentUser().getPassword()))
 			throw new UnauthorizedException("Actual password mismatch");
 	
-		user.setPassword(encoder.encode(pswdDTO.getNewPassword()));
-		currentUser = repository.save(user);
+		currentUser.setPassword(encoder.encode(pswdDTO.getNewPassword()));
+		currentUser = repository.save(currentUser);
 
 	}
 	
@@ -123,7 +124,7 @@ public class UserService {
 	}
 	
 	public void updateName(UserRefDTO nameDTO) {
-		currentUser.setName(nameDTO.getName());
+		getCurrentUser().setName(nameDTO.getName());
 		currentUser = repository.save(currentUser);
 
 	}
