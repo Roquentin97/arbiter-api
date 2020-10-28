@@ -26,6 +26,10 @@ public class Role {
 	@Column(nullable = false, unique = true)
 	@Pattern(regexp ="^ROLE_([A-Z]){4,50}$")
 	private String name;
+	
+	public Role(String name) {
+		this.name = name;
+	}
 
 	
 }
