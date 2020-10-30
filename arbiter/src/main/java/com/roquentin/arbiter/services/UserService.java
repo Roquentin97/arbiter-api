@@ -1,14 +1,18 @@
 package com.roquentin.arbiter.services;
 
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import javax.transaction.Transactional;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -21,13 +25,16 @@ import org.springframework.web.context.WebApplicationContext;
 
 import com.roquentin.arbiter.dto.UserPasswordUpdateDTO;
 import com.roquentin.arbiter.dto.UserRefDTO;
+import com.roquentin.arbiter.dto.UserRegistrationDTO;
 import com.roquentin.arbiter.expections.UnauthorizedException;
 import com.roquentin.arbiter.expections.UniqueKeyViolationException;
 import com.roquentin.arbiter.expections.UserNotFoundException;
+import com.roquentin.arbiter.models.RegistrationVerificationToken;
 import com.roquentin.arbiter.models.User;
 import com.roquentin.arbiter.payloads.requests.LoginRequest;
 import com.roquentin.arbiter.payloads.responses.JwtResponse;
 import com.roquentin.arbiter.payloads.responses.Responses;
+import com.roquentin.arbiter.repositories.RegistrationVerificationTokenRepository;
 import com.roquentin.arbiter.repositories.UserRepository;
 import com.roquentin.arbiter.security.UserDetailsImpl;
 import com.roquentin.arbiter.security.jwt.JwtUtils;
@@ -39,6 +46,9 @@ public class UserService {
 
 	@Autowired
 	private UserRepository repository;
+	
+	@Autowired
+	private RegistrationVerificationTokenRepository tokenRepository;
 
 	@Autowired
 	private RoleService roleService;
@@ -54,7 +64,8 @@ public class UserService {
 	
 	private User currentUser;
 	
-	public void createUser( User newUser) {
+	@Transactional
+	public User createUser( UserRegistrationDTO newUser) {
 		Map<String, String> errors = new HashMap<>();
 		if (repository.existsByUsernameIgnoreCase(newUser.getUsername())) {
 			errors.put("username", "Usernmae " + newUser.getUsername() + " has been taken.");
@@ -66,9 +77,16 @@ public class UserService {
 		if (!errors.isEmpty())
 			throw new UniqueKeyViolationException(errors);
 		
-		newUser.setRoles(Set.of(roleService.getRoleByName("ROLE_SIMPLE_USER")));
-		newUser.setPassword(encoder.encode(newUser.getPassword()));
-		repository.save(newUser);
+		User user = new User();
+		user.setEmail(newUser.getEmail());
+		user.setUsername(newUser.getUsername());
+		user.setPassword(newUser.getPassword());
+		user.setPassword(encoder.encode(newUser.getPassword()));
+		
+		//TODO:: get name from properties
+		user.setRoles(Set.of(roleService.getRoleByName("ROLE_SIMPLE_USER")));
+		
+		return repository.save(user);
 	
 	}
 	
@@ -100,7 +118,8 @@ public class UserService {
 			
 			return currentUser;
 	}
-	
+
+	@Transactional
 	public void updatePassword(UserPasswordUpdateDTO pswdDTO) {
 				
 		if (!encoder.matches(pswdDTO.getOldPassword(), getCurrentUser().getPassword()))
@@ -111,6 +130,7 @@ public class UserService {
 
 	}
 	
+	@Transactional
 	public void updateEmail(String email) {
 		User user = new User(currentUser);
 		
@@ -123,9 +143,35 @@ public class UserService {
 		currentUser = repository.save(user);
 	}
 	
+	// TODO change to update users not identity specific information
+	@Transactional
 	public void updateName(UserRefDTO nameDTO) {
 		getCurrentUser().setName(nameDTO.getName());
 		currentUser = repository.save(currentUser);
 
+	}
+	
+	//TODO add unit test
+	public void createVerificationToken(User user, String token) {
+		RegistrationVerificationToken vToken = new RegistrationVerificationToken(user, token);
+		tokenRepository.save(vToken);
+	}
+	
+	public ResponseEntity<?> confirmRegistration(String token) {
+		var vToken = tokenRepository.findByToken(token);
+		
+		if (vToken == null)
+			return new ResponseEntity<String>("Invalid token", HttpStatus.BAD_REQUEST);
+		
+		Calendar cal = Calendar.getInstance();
+		if (vToken.getExpiryDate().getTime() - cal.getTime().getTime() <= 0)
+			return new ResponseEntity<String>("Token expired", HttpStatus.FORBIDDEN);
+		
+		User user = vToken.getUser();
+		user.setEnabled(true);
+		
+		repository.save(user);
+		
+		return new ResponseEntity<String>("Registration confirmed successfully", HttpStatus.OK);
 	}
 }

@@ -1,0 +1,30 @@
+spring:
+
+  jpa:
+    properties:
+      hibernate:
+        jdbc:
+          lob.non_contextual_creation: true
+          batch_size: 20
+        dialect: "org.hibernate.dialect.PostgreSQLDialect"
+        generate_statistics: false
+        order_inserts: true
+        
+    database: "POSTGRESQL"
+    show-sql: true
+    hibernate:
+      ddl-auto: create-drop
+      
+  datasource:
+    platform: "postgres"
+    url:      "jdbc:postgresql://localhost:5432/arbiter"
+    username: "postgres"
+    password: "$#Bandera43"
+    initialization-mode: "always"
+  
+
+# App properties
+arbiter:
+ app:
+  jwtSecret: "RoquentinArbiter"
+  jwtExpirationMs: 43200000
