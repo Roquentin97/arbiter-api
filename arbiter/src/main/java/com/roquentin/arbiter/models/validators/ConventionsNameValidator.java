@@ -3,15 +3,12 @@ package com.roquentin.arbiter.models.validators;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
-
-public class NameValidator implements ConstraintValidator<NameConstraint, String>{
+public class ConventionsNameValidator implements ConstraintValidator<ValidConventionsName, String>{
 	
-	@Override
+	@Override 
 	public boolean isValid(String name, ConstraintValidatorContext ctx) {
-		return  name != null && 
-				name.matches("^[a-z]+[ ][a-z\\s]+$") &&
-				name.length() > 3 && name.length() < 50; 
-				
+		return name.matches("^[\\p{L}|0-9| |`|'|]*$") 
+				&& name.length() >= 4 && name.length() <= 50;
 	}
 
 }
