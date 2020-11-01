@@ -18,7 +18,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
 import com.roquentin.arbiter.dto.ConventionDTO;
-import com.roquentin.arbiter.expections.UnauthorizedException;
+import com.roquentin.arbiter.exceptions.UnauthorizedException;
 import com.roquentin.arbiter.models.Convention;
 import com.roquentin.arbiter.models.Cooperation;
 import com.roquentin.arbiter.models.User;

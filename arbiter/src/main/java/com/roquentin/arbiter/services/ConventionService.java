@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.roquentin.arbiter.dto.ConventionDTO;
-import com.roquentin.arbiter.expections.UnauthorizedException;
+import com.roquentin.arbiter.exceptions.UnauthorizedException;
 import com.roquentin.arbiter.models.Convention;
 import com.roquentin.arbiter.repositories.ConventionRepository;
 

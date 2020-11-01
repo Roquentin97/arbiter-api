@@ -30,7 +30,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import com.roquentin.arbiter.dto.CooperationRefDTO;
-import com.roquentin.arbiter.expections.CooperationNotFoundException;
+import com.roquentin.arbiter.exceptions.CooperationNotFoundException;
 import com.roquentin.arbiter.models.Cooperation;
 import com.roquentin.arbiter.models.User;
 import com.roquentin.arbiter.services.CooperationService;

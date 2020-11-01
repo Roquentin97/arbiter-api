@@ -16,7 +16,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.roquentin.arbiter.dto.CooperationRefDTO;
-import com.roquentin.arbiter.expections.CooperationNotFoundException;
+import com.roquentin.arbiter.exceptions.CooperationNotFoundException;
 import com.roquentin.arbiter.models.Cooperation;
 import com.roquentin.arbiter.models.User;
 import com.roquentin.arbiter.payloads.requests.LoginRequest;

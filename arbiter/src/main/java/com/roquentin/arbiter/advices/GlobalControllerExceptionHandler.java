@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-import com.roquentin.arbiter.expections.EntityNotFoundException;
+import com.roquentin.arbiter.exceptions.EntityNotFoundException;
 import com.roquentin.arbiter.payloads.responses.ErrorResponse;
 import com.roquentin.arbiter.payloads.responses.ErrorResponse.Causes;
 import com.roquentin.arbiter.payloads.responses.Responses;
