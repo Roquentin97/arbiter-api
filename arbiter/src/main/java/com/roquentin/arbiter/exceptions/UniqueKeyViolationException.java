@@ -1,8 +1,10 @@
-package com.roquentin.arbiter.expections;
+package com.roquentin.arbiter.exceptions;
 
 import java.util.Map;
 
 public class UniqueKeyViolationException extends RuntimeException {
+	
+	private static final long serialVersionUID = 1;
 	
 	public UniqueKeyViolationException() {
 		super("Some of given values that must be unique already in use");
