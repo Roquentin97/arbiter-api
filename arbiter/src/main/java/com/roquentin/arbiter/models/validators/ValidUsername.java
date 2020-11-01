@@ -13,8 +13,8 @@ import javax.validation.Payload;
 @Constraint(validatedBy = UsernameValidator.class)
 @Target({ElementType.METHOD, ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface UsernameConstraint {
-	String message() default "Invalid username";
+public @interface ValidUsername {
+	String message() default "Invalid username. Username can must include only letters and numbers. Possible length of the username is 5-25 characters";
 	Class<?>[] groups() default {};
 	Class<? extends Payload>[] payload() default {}; 
 }
