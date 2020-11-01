@@ -33,7 +33,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.context.support.WithMockUser;
 
 import com.roquentin.arbiter.dto.UserPasswordUpdateDTO;
-import com.roquentin.arbiter.expections.UniqueKeyViolationException;
+import com.roquentin.arbiter.dto.UserRegistrationDTO;
+import com.roquentin.arbiter.exceptions.PasswordMismatchException;
+import com.roquentin.arbiter.exceptions.UniqueKeyViolationException;
 import com.roquentin.arbiter.models.Role;
 import com.roquentin.arbiter.models.User;
 import com.roquentin.arbiter.payloads.requests.LoginRequest;
@@ -70,6 +72,8 @@ public class UserServiceTest {
 	private static User user1;
 	private static Authentication authentication;
 	private static UserDetailsImpl userDetails;
+	private static UserRegistrationDTO userRegistrationDTO;
+	
 	
 	@BeforeAll
 	public static void init() {
@@ -79,6 +83,12 @@ public class UserServiceTest {
 		user1.setPassword("$#12345678a");
 		user1.setName("User one");
 		user1.setRoles(Set.of(new Role("ROLE_SIMPLE_USER")));
+		
+		userRegistrationDTO = new UserRegistrationDTO();
+		userRegistrationDTO.setEmail(user1.getEmail());
+		userRegistrationDTO.setUsername(user1.getUsername());
+		userRegistrationDTO.setPassword(user1.getPassword());
+		userRegistrationDTO.setConfirmPassword(user1.getPassword());
 	
 		
 		userDetails = new UserDetailsImpl(1l, user1.getUsername(), user1.getEmail(), user1.getPassword(), user1.getRoles());
@@ -126,6 +136,7 @@ public class UserServiceTest {
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 	}
 	
+	// replace with integration test
 	@Test
 	@DisplayName("Valid user creation")
 	public void testCreateUserValid() {
@@ -141,6 +152,7 @@ public class UserServiceTest {
 		when(repository.save(any()))
 			.then(u -> {
 				user1.setId(1l);
+				user1.setPassword(password);
 				return user1;
 			});
 		
@@ -150,7 +162,7 @@ public class UserServiceTest {
 		when(roleService.getRoleByName(any()))
 			.thenReturn(new Role("ROLE_SIMPLE_USER"));
 		
-		service.createUser(user1);
+		user1 = service.createUser(userRegistrationDTO);
 		
 		assertEquals(1l, user1.getId());
 		assertEquals(password, user1.getPassword());
@@ -173,10 +185,11 @@ public class UserServiceTest {
 				return user1;
 			});
 			
-		assertThrows(UniqueKeyViolationException.class, () -> service.createUser(user1));
+		assertThrows(UniqueKeyViolationException.class, 
+				() -> service.createUser(userRegistrationDTO));
 		
 		try {
-			service.createUser(user1);
+			service.createUser(userRegistrationDTO);
 		} catch (UniqueKeyViolationException e) {
 			assertTrue(e.getMessage().contains("username"));
 			assertFalse(e.getMessage().contains("email"));
@@ -187,10 +200,11 @@ public class UserServiceTest {
 		when(repository.existsByEmailIgnoreCase(any()))
 		.thenReturn(true);
 		
-		assertThrows(UniqueKeyViolationException.class, () -> service.createUser(user1));
+		assertThrows(UniqueKeyViolationException.class, 
+				() -> service.createUser(userRegistrationDTO));
 		
 		try {
-			service.createUser(user1);
+			service.createUser(userRegistrationDTO);
 		} catch (UniqueKeyViolationException e) {
 			assertFalse(e.getMessage().contains("username"));
 			assertTrue(e.getMessage().contains("email"));
@@ -199,17 +213,33 @@ public class UserServiceTest {
 		when(repository.existsByUsernameIgnoreCase(any()))
 		.thenReturn(true);
 		
-		assertThrows(UniqueKeyViolationException.class, () -> service.createUser(user1));
+		assertThrows(UniqueKeyViolationException.class, 
+				() -> service.createUser(userRegistrationDTO));
 		
 		try {
-			service.createUser(user1);
+			service.createUser(userRegistrationDTO);
 		} catch (UniqueKeyViolationException e) {
 			assertTrue(e.getMessage().contains("username"));
 			assertTrue(e.getMessage().contains("email"));
 		}
-	
 	}
-
+	
+	@Test
+	@DisplayName("Creation new user with password and password`s confirmation mismatch")
+	public void testCreateUserPasswordMismatch() {
+		userRegistrationDTO.setConfirmPassword("invalidconfirmation");
+		
+		String password = "encoded";
+		
+		when(repository.existsByUsernameIgnoreCase(any()))
+			.thenReturn(false);
+		
+		when(repository.existsByEmailIgnoreCase(any()))
+			.thenReturn(false);
+		
+		assertThrows(PasswordMismatchException.class,
+				() -> service.createUser(userRegistrationDTO));
+	}
 	@Test
 	@DisplayName("User logs in via valid username")
 	public void testLogin() {
