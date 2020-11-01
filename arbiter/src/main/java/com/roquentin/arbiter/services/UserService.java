@@ -26,9 +26,10 @@ import org.springframework.web.context.WebApplicationContext;
 import com.roquentin.arbiter.dto.UserPasswordUpdateDTO;
 import com.roquentin.arbiter.dto.UserRefDTO;
 import com.roquentin.arbiter.dto.UserRegistrationDTO;
-import com.roquentin.arbiter.expections.UnauthorizedException;
-import com.roquentin.arbiter.expections.UniqueKeyViolationException;
-import com.roquentin.arbiter.expections.UserNotFoundException;
+import com.roquentin.arbiter.exceptions.PasswordMismatchException;
+import com.roquentin.arbiter.exceptions.UnauthorizedException;
+import com.roquentin.arbiter.exceptions.UniqueKeyViolationException;
+import com.roquentin.arbiter.exceptions.UserNotFoundException;
 import com.roquentin.arbiter.models.RegistrationVerificationToken;
 import com.roquentin.arbiter.models.User;
 import com.roquentin.arbiter.payloads.requests.LoginRequest;
@@ -80,7 +81,12 @@ public class UserService {
 		User user = new User();
 		user.setEmail(newUser.getEmail());
 		user.setUsername(newUser.getUsername());
-		user.setPassword(newUser.getPassword());
+
+		
+		//TODO move to constraint / validator
+		if (! newUser.getPassword().equals(newUser.getConfirmPassword()))
+			throw new PasswordMismatchException();
+		
 		user.setPassword(encoder.encode(newUser.getPassword()));
 		
 		//TODO:: get name from properties
