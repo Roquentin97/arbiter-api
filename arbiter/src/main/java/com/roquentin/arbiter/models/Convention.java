@@ -16,6 +16,8 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.roquentin.arbiter.models.validators.ValidConventionsDetails;
+import com.roquentin.arbiter.models.validators.ValidConventionsName;
 
 import lombok.Data;
 
@@ -27,15 +29,15 @@ public class Convention {
 	@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	
-	@Size(min = 4, max = 45, message = "Name must include at least 4 symbols but not more than 45.")
-	@Pattern(regexp = "^[\\w| |'|`]*$", message = "Name can include only letters, numbers, whitespaces, apostrophes, and underscores.")
+	@ValidConventionsName
 	@Column(nullable = false)
 	private String name;
 	
-	@Size(min = 5, max = 1024, message = "Description canot be shorter than 5 characters and longer than 1024.")
+	@ValidConventionsDetails
 	@Column(nullable = false)
 	private String description;
 	
+	@ValidConventionsDetails
 	@Size(min = 5, max = 1024, message = "Description canot be shorter than 5 characters and longer than 1024.")
 	private String consequence;
 	

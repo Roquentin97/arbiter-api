@@ -4,6 +4,7 @@ import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.Date;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -34,7 +35,7 @@ public class RegistrationVerificationToken {
 	@JoinColumn(nullable = false, name = "user_id")
 	private User user;
 	
-	// 
+	@Column(nullable = false)
 	private Date expiryDate = calculateExpiryDate(24);
 	
 	private Date calculateExpiryDate(int expiryTimeInHours) {

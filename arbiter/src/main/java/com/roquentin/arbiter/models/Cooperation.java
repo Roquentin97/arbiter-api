@@ -22,6 +22,8 @@ import javax.validation.constraints.Size;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.roquentin.arbiter.models.validators.ValidCooperationsDescription;
+import com.roquentin.arbiter.models.validators.ValidCooperationsName;
 
 import lombok.Data;
 
@@ -32,12 +34,11 @@ public class Cooperation {
 	@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	
-	@Size(min = 4, max = 45, message = "Name must include at least 4 symbols but not more than 45.")
-	@Pattern(regexp = "^[\\w| |'|`]*$", message = "Name can include only letters, numbers, whitespaces, apostrophes, and underscores.")
+	@ValidCooperationsName
 	@Column(nullable = false)
 	private String name;
 	
-	@Size(min = 5, max = 140, message = "Description canot be shorter than 5 characters and longer than 140.")
+	@ValidCooperationsDescription
 	private String description;
 	
 	@Column(nullable = false)

@@ -12,7 +12,7 @@ import lombok.Data;
 @Data
 public class UserRegistrationDTO {
 
-	@Email
+	@ValidEmail
 	@NotEmpty
 	private String email;
 	

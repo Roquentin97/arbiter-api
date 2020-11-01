@@ -18,6 +18,9 @@ import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.roquentin.arbiter.models.validators.ValidEmail;
+import com.roquentin.arbiter.models.validators.ValidUsername;
+import com.roquentin.arbiter.models.validators.ValidUsersName;
 
 import lombok.Data;
 
@@ -30,16 +33,14 @@ public class User {
 	private Long id;
 	
 	@Column(nullable = false, unique = true)
-	@Size(min = 3, max = 10, message = "Username length must contain at least 3 symbols long but not more than 10")
-	@Pattern(regexp = "^\\w*$", message = "Username cannot contain only letters, digits and underscores")
+	@ValidUsername
 	private String username;
 	
-	@Size(min = 3, max = 35, message = "Name must contain at least 3 symbols but not more than 35.")
-	@Pattern(regexp = "^([a-zA-Z]*[ ]?){1,3}$", message = "You can give only 3 names separated by single whitespace or dash. Names can contain only letters")
+	@ValidUsersName
 	private String name; 
 	
 	@Column(nullable = false, unique = true)
-	@Email
+	@ValidEmail
 	private String email;
 	
 	@Column(nullable = false)
